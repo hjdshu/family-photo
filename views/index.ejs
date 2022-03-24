@@ -1,0 +1,160 @@
+<%- include('header.ejs', {title: 'sherry007'})%>
+<style>
+  .list{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content:flex-start;
+  }
+  .van-uploader{
+    margin: 2vw;
+  }
+  .list .item{
+    width: 30.33333vw;
+    height: 30.33333vw;
+    overflow: hidden;
+    position: relative;
+    /* background: #549676; */
+    box-sizing: border-box;
+    margin: 1vw;
+    border-radius: 1vw;
+  }
+  .list .item:nth-child(3n+1){
+    margin-left:2.5vw;
+  }
+  
+  @media screen and (min-width: 750px) {
+    .list .item{
+      width: 240px;
+      height: 240px;
+      margin: 5px;
+      border-radius: 15px;
+    }
+    .list .item:nth-child(3n+1){
+      margin-left:5px;
+    }
+  }
+  .list .item img{
+    width: 100%;
+    display: block;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    position: absolute;
+  }
+  .list .item .desp{
+    position: absolute;
+    bottom: 40px;
+    left: 5%;
+    height: 32px;
+    font-size: 12px;
+    color: rgb(17, 17, 17);
+    line-height: 32px;
+    box-sizing: border-box;
+    background: rgb(255, 255, 255);
+    border: 1px solid #000;
+    width: 90%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    -o-text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align: center;
+  }
+  .uploadBox{
+    width: 90%;
+    margin: 10px auto;
+    border: 1px dotted rgb(185, 185, 185);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .uploadBox button{
+    margin-left: 10px;
+  }
+  .uploadBox textarea{
+    height: 40px;
+    padding: 5px;
+  }
+  .uploadBox .prev{
+    width: 80px;
+    height: 80px;
+    display: block;
+    margin: 2vw;
+  }
+</style>
+<body>
+  <div id="app">
+    <div class="list">
+      <div v-for="n in list" class="item" @click="prev(n)">
+        <img :src="n.url" alt="">
+        <div class="desp" >{{n.desp}}</div>
+      </div>
+    </div>
+    
+    <div class="uploadBox">
+      <van-uploader :after-read="afterRead" v-if="!uploadImg"><button>添加图片</button></van-uploader>
+      <img v-else :src="uploadImg" @click="uploadImg=''" alt="" class="prev">
+      <textarea v-model="despInput" placeholder="请输入图片描述"></textarea>
+      <van-button type="info" @click="update">上传</van-button>
+    </div>
+
+  </div>
+</body>
+<script>
+  var imgList = <%- JSON.stringify(list)%>;
+  var Vue = window.Vue;
+  var vant = window.vant;
+  // var VueLazyload = window.VueLazyload;
+  // Vue.use(VueLazyload, {
+  //   preLoad: 1,
+  //   loading: '/images/loading.gif'
+  // })
+  Vue.use(vant);
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        list: imgList,
+        uploadImg: '',
+        uploadFormData: '',
+        despInput: ''
+      }
+    },
+    methods: {
+      prev (n) {
+        window.location.href = '/shike/' + n.id
+      },
+      afterRead (e) {
+        let fd = new FormData()
+        fd.append('img', e.file)
+        this.uploadImg = e.content
+        this.uploadFormData = fd
+      },
+      update () {
+        if (!this.uploadFormData || !this.despInput) {
+          vant.Toast('请完成添加图片和图片描述')
+          return
+        };
+        this.uploadFormData.append('desp', this.despInput)
+        let config = {
+          headers: {'Content-Type': 'multipart/form-data'}
+        }
+        vant.Toast.loading({
+          mask: true,
+          duration: 0,       // 持续展示 toast
+          forbidClick: true, // 禁用背景点击
+          message: '加载中...'
+        });
+        axios.post('/photo/upload', this.uploadFormData, config).then(function(res) {
+          if (res.data.errorno != 0) {
+            vant.Toast.clear()
+            alert(res.data.msg)
+            return
+          }
+          location.reload()
+        })
+      }
+    }
+  })
+</script>
+
+</html>

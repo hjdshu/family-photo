@@ -1,0 +1,50 @@
+<%- include('header.ejs', {title: '相册'})%>
+<style>
+  .van-image{
+    display: block;
+  }
+</style>
+<body>
+  <div id="app">
+    <van-image
+      width="100%"
+      :src="data.rurl"
+      @click="prev"
+    ></van-image>
+
+    <div class="desp text">
+     <p><b>图片描述：</b></p> 
+     <p v-for="item in desp">{{item}}<p>
+    </div>
+  </div>
+</body>
+<script>
+  var shike = <%- JSON.stringify(shike)%>;
+  var Vue = window.Vue;
+  var vant = window.vant;
+  Vue.use(vant);
+  new Vue({
+    el: '#app',
+    data: function () {
+      return {
+        data: shike
+      }
+    },
+    computed: {
+      desp () {
+        if (this.data.desp) {
+          return this.data.desp.split('\n')
+        } else {
+          return []
+        }
+      }
+    },
+    methods: {
+      prev () {
+        window.history.back()
+      }
+    }
+  })
+</script>
+
+</html>

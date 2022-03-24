@@ -1,0 +1,58 @@
+<%- include('header.ejs', {title: '登录'})%>
+
+<body>
+  <script src="/javascripts/jquery.js"></script>
+  <script src="/javascripts/md5.js"></script>
+  <style>
+  </style>
+  <div id="app">
+    <div><van-field v-model="user" required clearable label="用户名"  placeholder="请输入用户名"/></div> 
+    <div><van-field v-model="password" type="password" label="密码" placeholder="请输入密码" required /></div>
+    <van-row type="flex" justify="center">
+      <van-col span="22">
+        <van-button type="primary" @click="login" size="large">登录</van-button>
+      </van-col>
+    </van-row>
+  </div>
+  <!-- <button class="login">登录</button> -->
+  <script>
+    var Vue = window.Vue;
+    var vant = window.vant;
+    Vue.use(vant);
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          user: '',
+          password: ''
+        }
+      },
+      methods: {
+        login () {
+          var u = this.user
+          var p = this.password
+          if (!u || !p) {
+            vant.Toast('请输入用户名密码')
+            return
+          }
+          axios({
+            url: '/api/user/login',
+            method: 'POST',
+            data: {
+              user: u,
+              password: p
+            }
+          }).then(function (data) {
+            if (data.data.errno == 0) {
+              window.location.href = '/'
+            } else {
+              vant.Toast('账号密码错误')
+            }
+          })
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
